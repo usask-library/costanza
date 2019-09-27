@@ -1,0 +1,255 @@
+[
+  {
+    "id": "02ed1db6-7b8b-46f1-b623-384e9e30880a",
+    "type": "comment",
+    "value": [
+      "For more information on this file, see:",
+      "        http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/cfg\/",
+      "                                 AND",
+      "        http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/db\/",
+      "In this file, lines starting with # are comments.  The lines starting",
+      "with ##  are meant solely as comments, whereas the lines starting with",
+      "only # are followed by example entries.",
+      "PLEASE NOTE: IF YOU CHANGE THIS FILE, you must restart EZproxy to make",
+      "those changes take effect. == see http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/restart.htm"
+    ]
+  },
+  {
+    "id": "035b29c3-ca8c-41da-96fd-8ed71687a4ca",
+    "type": "comment",
+    "value": "****************************EZproxy options *****************************************"
+  },
+  {
+    "id": "73368d7c-9827-4ac1-9d98-342ba1dbf523",
+    "type": "directive",
+    "name": "Name",
+    "value": "My.ezproxy.server",
+    "active": false,
+    "comment": [
+      "After running 'EZproxy -c' to test connectivity as instructed in the install guides",
+      "(http:\/\/www.oclc.org\/us\/en\/support\/documentation\/ezproxy\/download\/),",
+      "If necessary, Name your EZproxy server",
+      "== http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/cfg\/name\/"
+    ]
+  },
+  {
+    "id": "41960863-ad1f-45ed-9f00-e4cfed334293",
+    "type": "directive",
+    "name": "Option",
+    "value": "ProxyByHostname",
+    "active": false,
+    "comment": [
+      "EZproxy must be set to Proxy-by-port?or to Proxy-by-hostname:",
+      "see http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/portvshostname.htm",
+      "                           AND",
+      "http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/cfg\/proxybyhostname.htm"
+    ]
+  },
+  {
+    "id": "86f5c806-660a-4823-b07b-341fdd5b1f95",
+    "type": "directive",
+    "name": "LoginPort",
+    "value": "80",
+    "active": false,
+    "comment": "By default, EZproxy listens on port 2048. You can specify a different port here"
+  },
+  {
+    "id": "c4d57e54-bce1-4007-84f9-511fb87cdfaf",
+    "type": "directive",
+    "name": "LoginPortSSL",
+    "value": "443",
+    "active": false,
+    "comment": [
+      "SSL == see: http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/cfg\/ssl\/",
+      "If using Proxy by HostName you must use a wildcard SSL certificate",
+      "Please review http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/cfg\/ssl\/certopts.htm before implementing SSL"
+    ]
+  },
+  {
+    "id": "aafb0312-00ec-45aa-8e65-ae516c1bfc87",
+    "type": "comment",
+    "value": "Connection limits. == see: http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/cfg\/limits.htm"
+  },
+  {
+    "id": "d99e39d5-7d0d-4bd7-8478-cfc0bfcfdcc0",
+    "type": "directive",
+    "name": "MaxLifetime",
+    "value": "120"
+  },
+  {
+    "id": "a45b3bb3-5383-41b4-8977-99008a859666",
+    "type": "directive",
+    "name": "MaxSessions",
+    "value": "500"
+  },
+  {
+    "id": "678f9f66-b642-4dbc-90bc-e42a33b53f65",
+    "type": "directive",
+    "name": "MaxVirtualHosts",
+    "value": "1000"
+  },
+  {
+    "id": "1890d34a-b802-46ab-89c5-57ab5c4f61d5",
+    "type": "directive",
+    "name": "Option",
+    "value": "SafariCookiePatch",
+    "active": false,
+    "comment": [
+      "When using Safari 2.0 and later with only three hostname components, Safari defaults to blocking the cookie. With EZproxy 3.6c GA",
+      "2006-03-10) or later, you can add add the following to work around the restriction."
+    ]
+  },
+  {
+    "id": "773f0451-9e61-4afb-a5ac-c3a7a74b0c8c",
+    "type": "comment",
+    "value": "Securing EZproxy == see: http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/example\/securing.htm"
+  },
+  {
+    "id": "92691b12-a309-407c-9081-8f126cad38ab",
+    "type": "directive",
+    "name": "Audit",
+    "value": "Most"
+  },
+  {
+    "id": "db7531cf-f8f8-4a16-9656-4ed40b2a4769",
+    "type": "directive",
+    "name": "AuditPurge",
+    "value": "7"
+  },
+  {
+    "id": "77c88e25-00b4-4f53-98dd-7b092b1f1e7c",
+    "type": "directive",
+    "name": "Option",
+    "value": [
+      "StatusUser",
+      "LogSession"
+    ]
+  },
+  {
+    "id": "6886b06a-d2cc-4f85-9e9c-a7aece1f4c35",
+    "type": "directive",
+    "name": "IntruderIPAttempts",
+    "value": "-interval=5 -expires=15 20"
+  },
+  {
+    "id": "e35ea677-981a-4dd6-84fb-bd7fffc1aacf",
+    "type": "directive",
+    "name": "IntruderUserAttempts",
+    "value": "-interval=5 -expires=15 10"
+  },
+  {
+    "id": "ff91c2a9-f072-4d37-b81d-193c1543a340",
+    "type": "directive",
+    "name": "UsageLimit",
+    "value": "-enforce -interval=15 -expires=120 -MB=100 Global"
+  },
+  {
+    "id": "a2d2d69c-43dc-4c75-8198-607803ff25c0",
+    "type": "comment",
+    "value": [
+      "Logging == see: http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/cfg\/logformat\/",
+      "                                          AND",
+      "                http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/cfg\/logfile\/"
+    ]
+  },
+  {
+    "id": "99137894-5df4-455b-af69-b68f045bd811",
+    "type": "directive",
+    "name": "LogFormat",
+    "value": "%h %l %u %t \"%r\" %s %b"
+  },
+  {
+    "id": "ea3fc221-1ad5-4c97-bc3a-21f0e9f01c0a",
+    "type": "directive",
+    "name": "LogFile",
+    "value": "-strftime ezp%Y%m.log"
+  },
+  {
+    "id": "03e7ba10-a0e1-468e-98c7-b1edec8af6ae",
+    "type": "comment",
+    "value": [
+      "**************************** Database Definitions *****************************************",
+      "See http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/db\/default.htm",
+      "The following databases require no authentication,",
+      "but demonstrate EZproxy functionality, and can be used for testing.",
+      "Remove as desired."
+    ]
+  },
+  {
+    "id": "1d304704-3a41-4bae-bb81-ee50011b3a88",
+    "type": "stanza",
+    "code": "OCLC_WorldCat_org",
+    "name": "WorldCat"
+  },
+  {
+    "id": "148a59a6-1d45-4d60-a428-e2e7f60842eb",
+    "type": "custom_stanza",
+    "name": "WhatIsMyIp",
+    "value": [
+      "T WhatIsMyIP",
+      "U http://whatismyip.com",
+      "DJ whatismyip.com"
+    ]
+  },
+  {
+    "id": "e28c1825-b698-4ed6-b8c2-c11257a9bbd6",
+    "type": "stanza",
+    "code": "DOI_System",
+    "comment": [
+      "Many sites use dx.doi.org when linking from one database to another.",
+      "This definition is recommended for all configurations.?",
+      "See http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/db\/doi.htm for details"
+    ]
+  },
+  {
+    "id": "81e1ec25-3b76-47eb-9945-8b92480e983e",
+    "type": "comment",
+    "value": [
+      "**************************** OCLC Services *************************************************",
+      "Some OCLC services have been pre-configured with default settings below. remove the '#' from each line",
+      "associated with the desired service, and add additional options as desired"
+    ]
+  },
+  {
+    "id": "e74304e3-eea4-4253-a1c5-798f452f06a9",
+    "type": "stanza",
+    "code": "OCLC_FirstSearch",
+    "active": false,
+    "comment": "-----------------------------  OCLC FirstSearch ----------------------------------------------"
+  },
+  {
+    "id": "2eb0ad2d-c124-4fef-9f0b-e9273419a433",
+    "type": "stanza",
+    "code": "CAMIO",
+    "active": false,
+    "comment": "-----------------------------  OCLC CAMIO ----------------------------------------------------"
+  },
+  {
+    "id": "a42cf24d-7b5e-4bfe-b82c-13d9ebb4d85a",
+    "type": "stanza",
+    "code": "OCLC_ArchiveGrid",
+    "active": false,
+    "comment": "-----------------------------  OCLC ArchiveGrid ----------------------------------------------"
+  },
+  {
+    "id": "ef6e4bd5-7d5d-417e-babf-970419e9a65d",
+    "type": "comment",
+    "value": [
+      "--------------------------- NetLibrary ---------------------------------------------------------",
+      "NetLibrary was included in OCLC's default EZproxy config, however NetLibrary appears to now be",
+      "part of EBSCOhost, so it has been removed from this version of the default config file."
+    ]
+  },
+  {
+    "id": "74ccccb0-a3a0-43bb-9570-a83c8e17d45e",
+    "type": "comment",
+    "value": [
+      "************************ USER DEFINED DATABASES *************************************************",
+      "The section below is for all other user-defined databases",
+      "Please see: http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/db\/default.htm for configuration",
+      "information for common and supported stanzas",
+      "You may also want to join the EZproxy listserv",
+      "To subscribe see: http:\/\/www.oclc.org\/support\/documentation\/ezproxy\/list.htm"
+    ]
+  }
+]
