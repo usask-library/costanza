@@ -20,6 +20,7 @@
     "axios": "^0.19.0",
     "bootstrap": "^4.3.1",
     "bootstrap-vue": "^2.0.0",
+    "eslint-utils": "^1.4.2",
     "jquery": "^3.4.1",
     "js-cookie": "^2.2.1",
     "popper.js": "^1.15.0",
