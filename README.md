@@ -66,7 +66,6 @@ Install the Laravel and Vue dependencies:
 cd /var/www/costanza
 composer install
 npm install
-npm run production
 ```
 
 #### Database Setup
@@ -109,6 +108,15 @@ Some further changes to the .env file are needed.
 - `STANZA_PATH` should point to the location where you checked out the `ezproxy-stanzas` repo.  If you
   followed the documentation exactly, this will be `/var/www/ezproxy-stanzas`
 - The `MAIL_*` entries may need to be adjusted, depending on the mail configuration of your server   
+
+#### Generate Production Vue Code
+
+Run the following to generate production ready Vue code for Costanza.  Note, this **must** be done **after** creating
+and modifying the `.env` file in the above step.
+
+```bash
+npm run production
+```
 
 #### Apache Configuration
 
