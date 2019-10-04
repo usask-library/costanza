@@ -29,9 +29,20 @@
     <!--FAILED-->
     <div v-if="isFailed || isWarning">
       <div class="alert" v-bind:class="{ 'alert-danger': isFailed, 'alert-warning': isWarning }">
-        <p v-if="isFailed">Upload failed.</p>
-        <p v-if="isWarning">Upload succeeded, but the following issues were discovered.</p>
-        <ul v-html="uploadError"></ul>
+        <template v-if="isFailed">
+          <p >Upload failed.</p>
+          <ul v-html="uploadError"></ul>
+        </template>
+        <template v-else-if="isWarning">
+          <p>Upload succeeded, but the following issues were discovered:</p>
+          <ul>
+            <li v-for="(item, filename) in warnings">{{ filename }}
+              <ul>
+                <li v-for="error in warnings[filename]">{{ error }}</li>
+              </ul>
+            </li>
+          </ul>
+        </template>
       </div>
       <p>
         <a href="javascript:void(0)" @click="reset()">Try again</a>
@@ -67,7 +78,9 @@ export default {
       uploadedFiles: [],
       uploadError: null,
       currentStatus: null,
-      uploadFieldName: 'EZproxyFiles[]'
+      uploadFieldName: 'EZproxyFiles[]',
+      warnings: null,
+      errors: null
     }
   },
 
@@ -99,6 +112,8 @@ export default {
       this.currentStatus = STATUS_INITIAL;
       this.uploadedFiles = [];
       this.uploadError = null;
+      this.errors = null;
+      this.warnings = null;
     },
     save (formData) {
       // upload data to the server
@@ -116,13 +131,12 @@ export default {
         })
         .catch(error => {
           this.currentStatus = STATUS_FAILED;
-          console.log(error.response.data);
           var errors = [];
           if (error.response.data.hasOwnProperty('errors')) {
             Object.entries(error.response.data.errors).forEach(([key, val]) => errors.push(val));
           } else if (error.response.data.hasOwnProperty('warnings')) {
-            Object.entries(error.response.data.warnings).forEach(([key, val]) => errors.push(val));
             this.currentStatus = STATUS_WARNING;
+            this.warnings = error.response.data.warnings;
           } else if (error.response.data.hasOwnProperty('data')) {
             errors.push('<pre>' + JSON.stringify(error.response.data.data) + '</pre>');
           }
@@ -135,6 +149,7 @@ export default {
           })
         });
     },
+
     filesChange (fieldName, fileList) {
       // handle file changes
       const formData = new FormData();

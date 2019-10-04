@@ -7,7 +7,6 @@ use App\Http\Requests\FileImportRequest;
 use App\Http\Requests\FileNewRequest;
 use App\Mail\ExportEmail;
 use App\StanzaList;
-use http\Env\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
@@ -18,6 +17,159 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class FileController extends Controller
 {
+    // These EZproxy directives are considered to be part of a "database stanza" as that is typically where they appear
+    private static $stanzaDirectives = [
+        'Title', 'T',
+        'URL', 'U',
+        'HostJavaScript', 'HJ',
+        'Host', 'H',
+        'DomainJavaScript', 'DJ',
+        'Domain', 'D',
+        'AddUserHeader',
+        'AllowVars', 'EncryptVar',
+        'AnonymousURL',
+        'Cookie', 'CookieFilter',
+        'Description',
+        'FormSelect', 'FormVariable', 'FormSubmit',
+        'Find', 'Replace',
+        'HTTPHeader',                   // Despite being part of some OCLC stanzas, this may be better in nonStanzaDirectives
+        'HTTPMethod',                   // Despite being part of some OCLC stanzas, this may be better in nonStanzaDirectives
+        'MimeFilter',
+        'NeverProxy',                   // NeverProxy is position independent but is often used within individual stanzas
+        'Option Cookie',
+        'Option CookiePassThrough',
+        'Option DomainCookieOnly',
+        'Option NoCookie',
+        'Option HideEZproxy',
+        'Option NoHideEZproxy',
+        'Option HttpsHyphens',
+        'Option NoHttpsHyphens',
+        'Option MetaEZproxyRewriting',
+        'Option NoMetaEZproxyRewriting',
+        'Option ProxyFTP',
+        'Option NoProxyFTP',
+        'Option UTF16', 'Option NoUTF16',
+        'Option X-Forwarded-For', 'Option NoX-Forwarded-For',
+        'ProxyHostnameEdit', 'PHE',
+        'Proxy', 'ProxySSL',
+        'Referer',
+        'Validate',
+
+        // Site specific directives
+        'Books24x7Site', 'TokenKey', 'TokenSignatureKey',
+        'EBLSecret',
+        'ebrarySite',
+        'MetaFind',
+
+        'Option AllowSendGZip',         // Does not appear to be a valid directive, but appears in Visible_Body stanza
+        'Option ebraryUnencodedTokens', // Does not appear to be a valid directive, but appears in Ebrary and Ebook_Central stanzas
+        'Option X-Forwarded',           // Does not appear to be a valid directive, but appears in eTG_Complete stanza
+        'SSO',                          // Does not appear to be a valid directive, but appears in Skillsoft-Skillport
+    ];
+
+    // These directives are NOT typically used in a "database stanza"; instead they typically control how EZproxy functions
+    private static $nonStanzaDirectives = [
+        'Audit',
+        'AuditPurge',
+        'AutoLoginIP',
+        'AutoLoginIPBanner',
+        'BinaryTimeout',
+        'CASServiceURL',
+        'Charset',
+        'ClientTimeout',
+        'ConnectWindow',
+        'DbVar',
+        'DenyIfRequestHeader',
+        'DNS',
+        'ExcludeIP',
+        'ExcludeIPBanner',
+        'ExtraLoginCookie',
+        'FirstPort',
+        'Gartner',
+        'HAName',
+        'HAPeer',
+        'IncludeFile',
+        'IncludeIP', 'I',
+        'Interface',
+        'IntruderIPAttempts',
+        'IntruderLog',
+        'IntruderUserAttempts',
+        'IntrusionAPI', 'WhitelistIP',
+        'LBPeer',
+        'Location',
+        'LogFile',
+        'LogFilter',
+        'LogFormat',
+        'LoginCookieDomain',
+        'LoginCookieName',
+        'LoginMenu',
+        'LoginPort',
+        'LoginPortSSL',
+        'LogSPU',
+        'MaxConcurrentTransfers', 'MC',
+        'MaxLifetime', 'ML',
+        'MaxSessions', 'MS',
+        'MaxVirtualHosts', 'MV',
+        // 'MessagesFile',                  // This directive should never appear in messages.txt not config.txt
+        'Name',
+        'Option AcceptX-Forwarded-For',
+        'Option AllowWebSubdirectories',
+        'Option AnyDNSHostname',
+        'Option BlockCountryChange',
+        'Option CSRFToken',
+        'Option DisableSSL40bit',
+        'Option DisableSSLv2',
+        'Option ExcludeIPMenu',
+        'Option ForceHTTPSAdmin',
+        'Option ForceHTTPSLogin',
+        'Option ForceWildcardCertificate',
+        'Option IgnoreWildcardCertificate',
+        'Option IPv6',
+        'Option I choose to use Domain lines that threaten the security of my network',
+        'Option LoginReplaceGroups',
+        'Option LogRefer',
+        'Option LogSAML',
+        'Option LogSession',
+        'Option LogSPUEdit',
+        'Option LogUser',
+        'Option MenuByGroups',
+        'Option ProxyByHostname',
+        'Option RecordPeaks',
+        // 'Option RedirectUnknown',        // Disabled in EZproxy 5.1c
+        'Option ReferInHostname',
+        'Option RelaxedRADIUS',
+        'Option RequireAuthenticate',
+        'Option SafariCookiePatch',
+        'Option StatusUser',
+        'Option TicketIgnoreExcludeIP',
+        'Option UnsafeRedirectUnknown',
+        'Option UsernameCaretN',
+        'OverDriveSite',
+        'P3P',
+        'PDFRefresh', 'PDFRefreshPre', 'PDFRefreshPost',
+        'PidFile',
+        'RADIUSRetry',
+        'RedirectSafe',
+        'RejectIP',
+        'RemoteIPHeader', 'RemoteIPInternalProxy', 'RemoteIPTrustedProxy',
+        'RemoteTimeout',
+        'RunAs',
+        'ShibbolethDisable',
+        'SkipPort',
+        'SPUEdit', 'SPUEditVar',
+        'SSLCipherSuite',
+        'SSLHonorCipherOrder',
+        'SSLOpenSSLConfCmd',
+        'UMask',
+        'URLAppendEncoded',             // (replaced by URL -Append -Encoded)
+        'URLRedirectAppendEncoded',     // (replaced by URL -Redirect -Append -Encoded)
+        'URLRedirectAppend',            // (replaced by URL -Redirect -Append)
+        'URLRedirect',                  // (replaced by URL -Redirect)
+        'UsageLimit',
+        'XDebug',
+    ];
+
+
     /**
      * Return a JSON encoded list of files in the user's storage folder.
      *
@@ -113,6 +265,14 @@ class FileController extends Controller
     }
 
 
+    /**
+     * Export one or more EZproxy configuration files (in plain text format), converting them to the
+     * internal format (JSON) used by Costanza. The converted files, along with the JSON formatted files
+     * are placed in a ZIP archive abd sent via email to the current user.
+     *
+     * @param FileExportRequest $request
+     * @return mixed
+     */
     public function export(FileExportRequest $request)
     {
         $exportErrors = [];
@@ -171,13 +331,14 @@ class FileController extends Controller
      * The output actually has a bit of structure to it, to make automated parsing later somewhat
      * easier.
      *
-     * - Each entry in the file is enclosed by '### BEGIN' and '### END' lines
-     * - The BEGIN line includes the original entry "type" as defined by Costanza.
+     * - Each entry in the file is enclosed by '#-- BEGIN' and '#-- END' lines
+     * - The BEGIN line includes the original entry "type" as defined by Costanza as well as the entry ID.
+     * - For all entries other than a comment, the BEGIN line includes the active/inactive state of the entry.
      * - For entries of type "stanza", the BEGIN line contains the stanza "code", and
      *   any alternate name the user gave to this stanza
      * - For entries of type "custom_stanza", the BEGIN line contains any alternate name
      *   the user gave to this stanza
-     * - If the user added any notes/comments to the entry, these begin with "##"
+     * - If the user added any notes/comments to the entry, these begin with "#--"
      * - If the user marked the entry "inactive", the directives that make up the entry will begin
      *   with a single "#"
      *
@@ -210,10 +371,7 @@ class FileController extends Controller
 
         // The first "entry" in the file is a simple header
         $buffer = [
-            '# ======================================================================',
-            '# EZproxy Configuration File ' . $textFilename,
-            '# Generated by Costanza version ' . config('app.version'),
-            '# ======================================================================',
+            '#-- Costanza version ' . config('app.version') . ' -- EZproxy Configuration generated ' . date('c'),
         ];
         if (! Storage::disk('users')->append($outputFile, implode("\n", $buffer) . "\n\n")) {
             // Failure to write the buffer is a fatal error
@@ -228,67 +386,74 @@ class FileController extends Controller
 
             switch ($entry['type']) {
                 case 'comment':
-                    $buffer[] = '### BEGIN: comment';
+                    $buffer[] = '#-- BEGIN: comment|' . $entry['id'];
                     // Comments really only contain one field of data for the output file -- the comment itself
                     // Each line of the comment is preceded by a double #
                     foreach ((array)$entry['value'] as $comment) {
-                        $buffer[] = '## ' . $comment;
+                        $buffer[] = '#-- ' . $comment;
                     }
-                    $buffer[] = '### END: comment';
+                    $buffer[] = '#-- END: comment';
                     break;
 
                 case 'directive':
-                    $buffer[] = '### BEGIN: directive';
+                    $buffer[] = '#-- BEGIN: directive|' . $entry['id'] . '|'
+                        . (isset($entry['active']) && ($entry['active'] == false) ? 'false' : 'true');
                     // Directives can have user supplied notes/comments
                     // Each line of the comment is preceded by a double #
                     if (! empty($entry['comment'])) {
                         foreach ((array)$entry['comment'] as $comment) {
-                            $buffer[] = '## ' . $comment;
+                            $buffer[] = '#-- ' . $comment;
                         }
                     }
                     // Costanza allows a single Directive to have multiple values
                     // Each will appear on their own line in the output file, of course
                     // If the user marked this entry inactive, precede each line with a single #
                     foreach ((array)$entry['value'] as $value) {
-                        $buffer[] = ((isset($entry['active']) && ($entry['active'] === false)) ? '#' : '') .
+                        $buffer[] = ((isset($entry['active']) && ($entry['active'] == false)) ? '#' : '') .
                             $entry['name'] . ' ' . $value;
                     }
-                    $buffer[] = '### END: directive';
+                    $buffer[] = '#-- END: directive';
                     break;
 
                 case 'group':
                     // Groups can have user supplied notes/comments
                     // Each line of the comment is preceded by a double #
-                    $buffer[] = '### BEGIN: group';
+                    $buffer[] = '#-- BEGIN: group|' . $entry['id'] . '|' .
+                        (isset($entry['active']) && ($entry['active'] == false) ? 'false' : 'true');
                     if (! empty($entry['comment'])) {
                         foreach ((array)$entry['comment'] as $comment) {
-                            $buffer[] = '## ' . $comment;
+                            $buffer[] = '#-- ' . $comment;
                         }
                     }
                     // Each Group entry can have only one value
                     // If the user marked this entry inactive, precede each line with a single #
-                    $buffer[] = ((isset($entry['active']) && ($entry['active'] === false)) ? '#' : '') .
+                    $buffer[] = ((isset($entry['active']) && ($entry['active'] == false)) ? '#' : '') .
                         'GROUP ' . $entry['name'];
-                    $buffer[] = '### END: group';
+                    $buffer[] = '#-- END: group';
                     break;
 
                 case 'stanza':
                     // To aid in parsing later, include the stanza code and name
-                    $buffer[] = '### BEGIN: stanza|' .
+                    $buffer[] = '#-- BEGIN: stanza|' .
+                        $entry['id'] . '|' .
+                        (isset($entry['active']) && ($entry['active'] == false) ? 'false' : 'true') . '|' .
                         $entry['code'] . '|' .
                         ((! empty($entry['name'])) ? $entry['name'] : '') ;
+
+                    // ToDo: Figure out what to do with custom rules once that feature is implemented
+
                     // Stanzas can have user supplied notes/comments
                     // Each line of the comment is preceded by a double #
                     if (! empty($entry['comment'])) {
                         foreach ((array)$entry['comment'] as $comment) {
-                            $buffer[] = '## ' . $comment;
+                            $buffer[] = '#-- ' . $comment;
                         }
                     }
                     // The "master" stanza list should contain a matching entry
                     $stanza = StanzaList::get($entry['code']);
                     if (empty($stanza)) {
                         $conversionErrors[] = 'Unknown stanza code ' . $entry['code'];
-                        $buffer[] = '# *** Costanza did not recognize stanza code ' . $entry['code'];
+                        $buffer[] = '#-- Costanza did not recognize stanza code ' . $entry['code'];
                     } elseif ($oclc_includes && (! empty($stanza->oclcIncludeFile))) {
                         $buffer[] .= 'IncludeFile ' . $stanza->oclcIncludeFile;
                     } else {
@@ -303,17 +468,19 @@ class FileController extends Controller
                             }
                         }
                     }
-                    $buffer[] = '### END: stanza';
+                    $buffer[] = '#-- END: stanza';
                     break;
 
                 case 'custom_stanza':
                     // To aid in parsing later, include the custom stanza name
-                    $buffer[] = '### BEGIN: custom_stanza|' . ((! empty($entry['name'])) ? $entry['name'] : '') ;
+                    $buffer[] = '#-- BEGIN: custom_stanza|' . $entry['id'] . '|' .
+                        (isset($entry['active']) && ($entry['active'] == false) ? 'false' : 'true') . '|' .
+                        ((! empty($entry['name'])) ? $entry['name'] : '') ;
                     // Custom Stanzas can have user supplied notes/comments
                     // Each line of the comment is preceded by a double #
                     if (! empty($entry['comment'])) {
                         foreach ((array)$entry['comment'] as $comment) {
-                            $buffer[] = '## ' . $comment;
+                            $buffer[] = '#-- ' . $comment;
                         }
                     }
                     // Each line of the custom stanza is stored in the value array
@@ -321,7 +488,7 @@ class FileController extends Controller
                     foreach ((array)$entry['value'] as $value) {
                         $buffer[] = ((isset($entry['active']) && ($entry['active'] === false)) ? '#' : '') . $value;
                     }
-                    $buffer[] = '### END: stanza';
+                    $buffer[] = '#-- END: stanza';
                     break;
             }
 
@@ -343,41 +510,50 @@ class FileController extends Controller
 
 
     /**
+     * Import one or more EZproxy configuration files (in plain text format), converting them to the
+     * internal format (JSON) used by Costanza
+     *
      * @param FileImportRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return mixed
      */
     public function import(FileImportRequest $request)
     {
-        // Each uploaded file needs to be converted to the internal JSON format used by Costanza
+        // Some arrays to hold any errors/warnings returned by the converter, as well as the list of converted files
         $importErrors = [];
         $importedFiles = [];
+
+        // Process each uploaded file in turn
         foreach ($request->file('EZproxyFiles') as $file) {
+            // Save just the filename portion
             $filename = $file->getClientOriginalName();
             $importedFiles[] = $filename;
 
+            // Perform the file conversion.  The return value is either null, or an array of warnings/errors
             $status = $this->convertFromEZproxy($file);
             if (! empty($status)) {
                 $importErrors[$filename] = $status;
             }
         }
 
+        // If there were errors, return those...
         if (! empty($importErrors)) {
             return response()->json([
                 'status' => 'warning',
                 'message' => 'One or more imported files contained errors',
                 'warnings' => $importErrors
-            ],400);
+            ], 400);
         }
 
+        // ... otherwise return success
         return response()->json([
             'status' => 'success',
             'message' => 'Successfully imported EZproxy configuration',
             'data' => implode(', ', $importedFiles)
-        ],200);
+        ], 200);
     }
 
     /**
-     * Convert an EZproxy file from its text format to the JSON format used by Costanza,
+     * Convert a single EZproxy file from its text format to the JSON format used by Costanza,
      * identifying stanzas where possible
      *
      * @param UploadedFile $uploadedFile
@@ -396,19 +572,20 @@ class FileController extends Controller
         $EZproxyConfig = [];
         $warnings = [];
 
-        // Read the input file line by line
-        $file = preg_split("/[\r\n]+/", File::get($uploadedFile));
+        // Read the input file into an array, one element per line
+        $file = preg_split("/[\r\n]/", File::get($uploadedFile));
 
-        while ($entry = self::getNextEZproxyEntry($file)) {
-            // Ensure the current entry has an ID number, and add it to the EZproxy config array
-            $entry['id'] = Str::uuid()->toString();
-
+        // Extract each "entry" (comment, group, stanza, directive) from the file array
+        $lineNumber = 0;
+        while ($entry = self::getNextEZproxyEntry($file, $lineNumber)) {
             if (! empty($entry['warnings'])) {
                 $warnings = array_merge($warnings, $entry['warnings']);
                 unset($entry['warnings']);
             }
 
-            $EZproxyConfig[] = $entry;
+            if (isset($entry['type']) && ($entry['type'] != 'unknown')) {
+                $EZproxyConfig[] = $entry;
+            }
         }
 
         // Save this file in JSON format
@@ -429,117 +606,187 @@ class FileController extends Controller
      * This function was meant to be called repeatedly, to extract each parsable entry from the EZproxy file
      * in turn, until none are left.
      *
-     * @param   array       $array  An array representing each line of the EZproxy config file
+     * @param   array       $fileArray  An array representing each line of the EZproxy config file
      * @return  array|bool          Returns an array representing the entry extracted, or FALSE when the array is empty
      */
-    private static function getNextEZproxyEntry(&$array) {
-        $validStanzaDirectives = [
-            'Title', 'T',
-            'URL', 'U',
-            'Host', 'HostJavaScript', 'H', 'HJ',
-            'Domain', 'DomainJavaScript', 'D', 'DJ',
-            'Description',
-            'MimeFilter',
-            'Find', 'Replace',
-            'AddUserHeader',
-            'AllowVars', 'EncryptVar',
-            'FormSelect', 'Formvariable', 'FormSubmit',
-            'ProxyHostnameEdit',
+    private static function getNextEZproxyEntry(&$fileArray, &$lineNumber) {
+        // Stitch together the stanza and non-stanza directives into a string for use in a regex later
+        $stanzaDirectives = implode('|', self::$stanzaDirectives);
+        $nonStanzaDirectives = implode('|', self::$nonStanzaDirectives);
 
-            // The following directives can be used as part of a stanza, but are position independent directives
-            // Including them here as a stanza directive will lead to multiple single line misidentified stanzas
-            //'HTTPHeader', 'HTTPMethod',
-            //'Option',
-            //'Proxy', 'ProxySSL',
-            //'RedirectSafe',
-
-            // Weird site specific directives
-            'Books24x7Site', 'TokenKey', 'TokenSignatureKey',
-            'EBLSecret',
-            'ebrarySite',
-            'MetaFind',
-
-            // Are these problematic???
-            'Cookie', 'CookieFilter',
-        ];
-
-        // Stitch together the above array into a string for use a regex later
-        // Yes, these directives could have been written as a string to start with, but the array notation is
-        // easier to read and edit.
-        $stanzaDirectives = implode('|', $validStanzaDirectives);
-
-        // Pull the first line off the array. If it's a blank line, continue until one that isn not blank is found
+        // Skip over blank lines
         $line = null;
-        while (empty($line) && (! empty($array))) {
-            $line = array_shift($array);
+        while ((! empty($fileArray)) && (empty($line) || preg_match("/^#-- Costanza version /", $line))) {
+            $line = trim(array_shift($fileArray));
+            $lineNumber++;
         }
 
         // If the array is empty, there is nothing to do.
-        if (empty($array)) {
+        if (empty($line) && empty($fileArray)) {
             return false;
         }
 
         // Keep track of the Title. The Title is needed, but finding a second one indicates the start of a new stanza
         $title = null;
         $entry = [];
+        $entry['id'] = Str::uuid()->toString();
 
         // The first "element" on the line determines what type of entry this is.
         // The remainder of the line is "data" portion
-        if (preg_match("/^\s*#(.*)$/", $line, $matches)) {
-            // A comment
-            $entry['type'] = 'comment';
-            $entry['value'][] = empty($matches[1]) ? '' : $matches[1];
 
-            // Continue to read any subsequent comments
-            while ((! empty($array)) && preg_match("/^\s*#(.*)$/", $array[0], $matches)) {
-                $line = array_shift($array);
-                $entry['value'][] = empty($matches[1]) ? '' : $matches[1];
+        if (preg_match("/^#-- BEGIN:\s+(.*)$/", $line, $matches)) {
+            // Specially formatted block that matches the export from Costanza
+            // The BEGIN line encodes important details about the entry
+
+            // COMMENT has only 2 encoded fields -- TYPE and ID
+            $entryData = explode('|', $matches[1]);
+            $entry['type'] = $entryData[0];
+            $entry['id'] = $entryData[1];
+
+            // Everything else has a 3rd encoded field -- ACTIVE
+            if ($entry['type'] !== 'comment') {
+                $entry['active'] = ($entryData[2] === 'false') ? false : true;
             }
-        } elseif (preg_match("/^\s*GROUP\s+(.*)$/i", $line, $matches)) {
-            // A Group directive
+            // CUSTOM STANZAS have an options 4th encoded field -- NAME
+            if ($entry['type'] === 'custom_stanza') {
+                $entry['name'] = empty($entryData[3]) ? '** UNKNOWN DATABASE **' : $entryData[3];
+            }
+            // STANZAS have a 4th encoded field and an optional 5th -- ID CODE and NAME
+            if ($entry['type'] === 'stanza') {
+                if (empty($entryData[3])) {
+                    $entry['warnings'][] = ': Missing database ID code on line '  . $lineNumber;
+                } else {
+                    // Ensure the database ID code is actually valid
+                    $stanza = StanzaList::get($entryData[3]);
+                    if (empty($stanza->code)) {
+                        // Add an error message to the queue and treat this entry like a custom stanza
+                        $entry['warnings'][] = ': Invalid database ID code on line '  . $lineNumber . ': ' .
+                            $entryData[3] . ' -- converting to custom stanza';
+                        $entry['type'] = 'custom_stanza';
+                        $entry['name'] = '** INVALID DATABASE **';
+                    } else {
+                        $entry['code'] = $entryData[3];
+                    }
+                }
+                if (! empty($entryData[4])) {
+                    $entry['name'] = $entryData[4];
+                }
+            }
+
+            // Each BEGIN should have a matching END; keep reading lines until we find it
+            while ((! empty($fileArray)) && (! preg_match("/^#-- END/", $fileArray[0]))) {
+                $line = array_shift($fileArray);
+                $lineNumber++;
+
+                if (preg_match('/^#--\s+(.*)$/', $line, $matches)) {
+                    // If the line starts with "#--" it is part of the comment/note
+                    if ($entry['type'] === 'comment') {
+                        $entry['value'][] = $matches[1];
+                    } else {
+                        $entry['comment'][] = $matches[1];
+                    }
+                } elseif (preg_match('/^#?(.*)$/', $line, $matches)) {
+                    // All other lines form the "value"
+                    if ($entry['type'] === 'directive') {
+                        $fields = preg_split("/\s+/", $matches[1], 2);
+                        $entry['name']= $fields[0];
+                        $entry['value'][] = $fields[1];
+                    } elseif ($entry['type'] === 'group') {
+                        $fields = preg_split("/\s+/", $matches[1], 2);
+                        $entry['name']= $fields[1];
+                    } elseif ($entry['type'] === 'custom_stanza') {
+                        $entry['value'][] = $matches[1];
+                    } elseif ($entry['type'] == 'stanza') {
+                        // Safely ignore the actual stanza directives
+                    }
+                }
+            }
+            // The END marker should be at the front of the file array; remove it
+            if ((! empty($fileArray)) && preg_match("/^#-- END/", $fileArray[0])) {
+                $line = array_shift($fileArray);
+                $lineNumber++;
+            }
+        } elseif (preg_match("/^([#\s]*)GROUP\s+(.*)$/i", $line, $matches)) {
+            // A GROUP directive, either active or inactive
             $entry['type'] = 'group';
-            $entry['name'] = $matches[1];
-        } elseif (preg_match("/^\s*(" . $stanzaDirectives . ")\s+(.*)$/i", $line, $matches)) {
-            // A stanza directive
+            $entry['name'] = $matches[2];
+            if (preg_match("/^\s*#/", $matches[1])) {
+                $entry['active'] = false;
+            }
+        } elseif (preg_match("/^([#\s]*)(" . $stanzaDirectives . ")\b\s*(.*)$/i", $line, $matches)) {
+            // A stanza directive, either active or inactive
             $entry['type'] = 'custom_stanza';
-            $entry['value'][] = $matches[1] . ' ' . $matches[2];
-            if (preg_match('/^(Title|T)$/i', $matches[1])) {
+            $entry['value'][] = (preg_match('/#/', $matches[1]) ? '#' : '' ) . $matches[2] . ' ' . $matches[3];
+            if (preg_match('/^(Title|T)$/i', $matches[2])) {
                 // Save the title
-                $title = $matches[2];
+                $title = $matches[3];
                 $entry['name'] = $title;
             }
 
             // Continue to read any subsequent stanza directives
-            while ((! empty($array)) && preg_match("/^\s*(" . $stanzaDirectives . ")\s+(.*)$/i", $array[0], $matches)) {
-                if (preg_match('/^(Title|T)$/i', $matches[1]) && empty($title)) {
+            while ((! empty($fileArray)) && preg_match("/^([#\s]*)(" . $stanzaDirectives . ")\b\s*(.*)$/i", $fileArray[0], $matches)) {
+                if (preg_match('/^(Title|T)$/i', $matches[2]) && empty($title)) {
                     // Encountered Title and title is empty
-                    $title = $matches[2];
-                    $line = array_shift($array);
+                    $title = $matches[3];
+                    $line = array_shift($fileArray);
+                    $lineNumber++;
                     $entry['name'] = $title;
-                    $entry['value'][] = $matches[1] . ' ' . $matches[2];
-                } elseif (preg_match('/^(Title|T)$/i', $matches[1]) && (! empty($title))) {
+                    $entry['value'][] = (preg_match('/#/', $matches[1]) ? '#' : '' ) . $matches[2] . ' ' . $matches[3];
+                } elseif (preg_match('/^(Title|T)$/i', $matches[2]) && (! empty($title))) {
                     // Encountered Title but title is NOT empty
-                    // Signals the end of the current entry
+                    // Signals the end of the current entry and the beginning of a new stanza
+                    //  (because a stanza cannot have 2 titles; must be 2 stanzas joined together)
                     break;
                 } else {
                     // Is a stanza directive, but not the title
-                    $line = array_shift($array);
-                    $entry['value'][] = $matches[1] . ' ' . $matches[2];
+                    $line = array_shift($fileArray);
+                    $lineNumber++;
+                    $entry['value'][] = (preg_match('/#/', $matches[1]) ? '#' : '' ) . $matches[2] . ' ' . $matches[3];
                 }
             }
-        } elseif (preg_match("/^\s*([^\s]+)\s+(.*)$/", $line, $matches)) {
-            // Some other directive
+
+            if (empty($entry['name'])) {
+                $entry['name'] = '** UNKNOWN DATABASE **';
+            }
+        } elseif (preg_match("/^\s*(" . $nonStanzaDirectives . ")\b\s*(.*)$/i", $line, $matches)) {
+            // A non-stanza directive, active
             $entry['type'] = 'directive';
             $entry['name'] = $matches[1];
             $entry['value'][] = $matches[2];
 
             // Continue to read any subsequent matching non-stanza directives
-            while ((! empty($array)) && preg_match("/^\s*" . $entry['name'] . "\s+(.*)/i", $array[0], $matches)) {
-                $line = array_shift($array);
+            while ((! empty($fileArray)) && preg_match("/^\s*" . $entry['name'] . "\s+(.*)/i", $fileArray[0], $matches)) {
+                $line = array_shift($fileArray);
+                $lineNumber++;
                 $entry['value'][] = $matches[1];
             }
+        } elseif (preg_match("/^\s*#+[\s#]*(" . $nonStanzaDirectives . ")\b\s*(.*)$/i", $line, $matches)) {
+            // A non-stanza directive, inactive
+            $entry['type'] = 'directive';
+            $entry['name'] = $matches[1];
+            $entry['value'][] = $matches[2];
+            $entry['active'] = false;
+
+            // Continue to read any subsequent matching non-stanza directives
+            while ((! empty($fileArray)) && preg_match("/^\s*#+[\s#]*" . $entry['name'] . "\s*(.*)$/i", $fileArray[0], $matches)) {
+                $line = array_shift($fileArray);
+                $lineNumber++;
+                $entry['value'][] = $matches[1];
+            }
+        } elseif (preg_match("/^\s*#(.*)$/", $line, $matches)) {
+            // Anything not matched already, that starts with a "#" is a comment
+            $entry['type'] = 'comment';
+            $entry['value'][] = empty($matches[1]) ? '' : $matches[1];
+
+            // Continue to read any subsequent comments
+            while ((! empty($fileArray)) && preg_match("/^\s*#(.*)$/", $fileArray[0], $matches)) {
+                $line = array_shift($fileArray);
+                $lineNumber++;
+                $entry['value'][] = empty($matches[1]) ? '' : $matches[1];
+            }
         } else {
-            $entry['warnings'][] = "Failed to properly parse line: " . $line;
+            $entry['type'] = 'unknown';
+            $entry['warnings'][] = ': Failed to properly parse line '  . $lineNumber . ': ' . $line;
         }
 
         return $entry;
