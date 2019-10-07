@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7b1315610ff573141384c532f905919c",
+    "content-hash": "de36e82e0f23662983349e106af6eb6c",
     "packages": [
         {
             "name": "dnoegel/php-xdg-base-dir",
@@ -2656,7 +2656,7 @@
                 },
                 {
                     "name": "Gert de Pagter",
-                    "email": "backendtea@gmail.com"
+                    "email": "BackEndTea@gmail.com"
                 }
             ],
             "description": "Symfony polyfill for ctype functions",

@@ -62,4 +62,24 @@ class StanzaListController extends Controller
             'data' => $matchingStanza
         ],200);
     }
+
+    /**
+     * Get the contents of a single database stanza.
+     *
+     * @param $stanzaCode
+     * @return \Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     */
+    public function contents($stanzaCode)
+    {
+        $stanzaDirectives = StanzaList::getStanza($stanzaCode);
+        if (empty($stanzaDirectives)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No matching stanza was found with ID ' . $stanzaCode
+            ], 400);
+        }
+
+        return response(implode("\n", $stanzaDirectives), 200)
+            ->header('Content-Type', 'text/plain');
+    }
 }

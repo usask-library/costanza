@@ -45,8 +45,14 @@ code that should **not** be accessible via the browser. **DO NOT** checkout the 
 On many web servers, the default folder for web content is `/var/www/html`.  The following installation instructions
 assume will assume that, and may need to be adjusted depending on your server setup.
 
-1. Costanza requires [`usask-library/ezproxy-stanzas`](https://github.com/usask-library/ezproxy-stanzas) repository.
-   You will need to check out that repo as well as Costanza.
+1. Costanza requires the [`usask-library/ezproxy-stanzas`](https://github.com/usask-library/ezproxy-stanzas) repository.
+   You may clone that repository locally to improve speed (especially during the export process) but you will need to
+   keep it up to date by running `git pull` when stanzas are updated. Alternatively, Costanza can fetch stanza information
+   from the `ezproxy-stanzas` repository in real time. This ensures it always has the latest versions of the EZproxy
+   stanzas, but with a slight reduction in speed.  Whichever method you choose, be sure to set the `GITHUB_STANZAS`
+   and `STANZA_PATH` settings appropriately as mentioned in the **Configuration File and Application Key** section below. 
+   
+   To check out the `ezproxy-stanzas` repo locally:
    ```bash
    # cd /var/www
    git clone https://github.com/usask-library/ezproxy-stanzas.git
@@ -107,7 +113,9 @@ Some further changes to the .env file are needed.
 - `MIX_APP_PATH` should match the path portion of the above `APP_URL` -- `/` or `/costanza/` for example
 - `STANZA_PATH` should point to the location where you checked out the `ezproxy-stanzas` repo.  If you
   followed the documentation exactly, this will be `/var/www/ezproxy-stanzas`
-- The `MAIL_*` entries may need to be adjusted, depending on the mail configuration of your server   
+- `GITHUB_STANZAS` should be set to `false` if you elected to clone the `ezproxy-stanzas` repository locally,
+  or `true` if you wish to have Costanza fetch stanza information data from the GitHub repository in real time
+- The `MAIL_*` entries may need to be adjusted, depending on the mail configuration of your server
 
 #### Generate Production Vue Code
 

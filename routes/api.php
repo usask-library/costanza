@@ -33,6 +33,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     // Stanza routes
     Route::get('stanza', 'StanzaListController@index');
+    Route::get('stanza/{id}/contents', 'StanzaListController@contents');
     Route::get('stanza/{id}', 'StanzaListController@show');
 
     // EZproxy/Costanza file routes
