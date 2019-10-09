@@ -10,7 +10,7 @@
     <div v-if="entry.comment" class="row mb-3">
       <div class="col-md-2">Comment</div>
       <div class="col-md-10">
-        <pre>{{ Array.isArray(entry.comment) ? entry.comment.join("\n") : entry.comment }}</pre>
+        <pre style="white-space: pre-wrap">{{ Array.isArray(entry.comment) ? entry.comment.join("\n") : entry.comment }}</pre>
       </div>
     </div>
 
