@@ -3,8 +3,8 @@
 
 namespace App;
 
-use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Storage;
+use App\GitHub;
 
 class StanzaList
 {
@@ -18,7 +18,7 @@ class StanzaList
     {
         if (env('GITHUB_STANZAS', false)) {
             // Fetch the stanza list file from the GitHub repo
-            $stanzaList = self::getGitHubFileContents();
+            $stanzaList = GitHub::get();
             if (empty($stanzaList)) {
                 return false;
             }
@@ -84,7 +84,7 @@ class StanzaList
         }
 
         if (env('GITHUB_STANZAS', true)) {
-            $stanzaDirectives = self::getGitHubFileContents($stanza->stanza);
+            $stanzaDirectives = GitHub::get($stanza->stanza);
         } else {
             $stanzaDirectives = Storage::disk('stanzas')->get($stanza->stanza);
         }
@@ -93,37 +93,5 @@ class StanzaList
             return false;
         }
         return preg_split("/[\r\n]+/", $stanzaDirectives);
-    }
-
-
-    /**
-     * Fetch a file from ezproxy-stanzas repo.
-     *
-     * If no filename is specified, return the JSON encoded list of known stanzas (stanza_list.json).
-     * If a specific file is requested, return the raw (usually plain text) contents of that file.
-     *
-     * @param string $repositoryFile
-     * @return mixed|string|null
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    private static function getGitHubFileContents($repositoryFile = 'stanza_list.json')
-    {
-        $client = new Client();
-
-        $response = $client->request('GET', 'https://api.github.com/repos/usask-library/ezproxy-stanzas/contents/' . $repositoryFile);
-        if ($response->getStatusCode() != '200') {
-            return null;
-        }
-        $body = json_decode($response->getBody());
-        if (empty($body->size) || empty($body->content)) {
-            return null;
-        }
-
-        // Return JSON data for files ending in '.json' and the raw data for everything else
-        if (preg_match("/\.json$/", $body->name)) {
-            return json_decode(base64_decode($body->content));
-        } else {
-            return base64_decode($body->content);
-        }
     }
 }

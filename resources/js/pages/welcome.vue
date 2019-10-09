@@ -6,56 +6,67 @@
     <h4>Get started:</h4><br/>
 
     <template v-if="authenticated">
-      <b-card-group deck>
-        <b-card class="border-primary mx-2" no-body>
-          <b-card-body>
-            <b-card-title class="text-primary">Start fresh.</b-card-title>
-            <p class="card-text">Create a new config file using the default EZproxy template as a starting point.</p>
-          </b-card-body>
-          <b-card-footer>
-            <router-link tag="a" class="btn btn-primary" to="new">New</router-link>
-          </b-card-footer>
-        </b-card>
+      <b-container>
+        <b-row>
+          <b-col>
+            <b-card-group deck class="mb-3">
+              <b-card class="border-primary mx-2" no-body>
+                <b-card-body>
+                  <b-card-title class="text-primary">Start fresh.</b-card-title>
+                  <p class="card-text">Create a new config file using the default EZproxy template as a starting point.</p>
+                </b-card-body>
+                <b-card-footer>
+                  <router-link tag="a" class="btn btn-primary" to="new">New</router-link>
+                </b-card-footer>
+              </b-card>
+              <b-card class="border-success mx-2" no-body>
+                <b-card-body>
+                  <b-card-title class="text-success">Continue working.</b-card-title>
+                  <p class="card-text">A previous EZproxy configuration was found on the server. You can continue working on that!.</p>
+                </b-card-body>
+                <b-card-footer>
+                  <router-link tag="a" class="btn btn-success" to="open">Resume</router-link>
+                </b-card-footer>
+              </b-card>
+            </b-card-group>
 
-        <b-card class="border-success mx-2" no-body>
-          <b-card-body>
-            <b-card-title class="text-success">Continue working.</b-card-title>
-            <p class="card-text">A previous EZproxy configuration was found on the server. You can continue working on that!.</p>
-          </b-card-body>
-          <b-card-footer>
-            <router-link tag="a" class="btn btn-success" to="open">Resume</router-link>
-          </b-card-footer>
-        </b-card>
+            <b-card-group deck class="mb-3">
+              <b-card class="border-warning mx-2" no-body>
+                <b-card-body>
+                  <b-card-title class="text-warning">Import an EZproxy config.</b-card-title>
+                  <p class="card-text">Import your existing EZproxy <code>config.txt</code> file. It will automatically be converted to the format required by Costanza.</p>
+                </b-card-body>
+                <b-card-footer>
+                  <router-link tag="a" class="btn btn-warning" to="import">Import</router-link>
+                </b-card-footer>
+              </b-card>
 
-        <!--
-        <b-card class="border-info mx-2" no-body>
-          <b-card-body>
-            <b-card-title class="text-info">Upload a Costanza file.</b-card-title>
-            <p class="card-text">Upload a <code>config.json</code> file that you previously created with Costanza.</p>
-          </b-card-body>
-          <b-card-footer><router-link tag="a" class="btn btn-info" to="upload">Upload</router-link></b-card-footer>
-        </b-card>
-        -->
-
-        <b-card class="border-warning mx-2" no-body>
-          <b-card-body>
-            <b-card-title class="text-warning">Import an EZproxy config.</b-card-title>
-            <p class="card-text">Import your existing EZproxy <code>config.txt</code> file. It will automatically be converted to the format required by Costanza.</p>
-          </b-card-body>
-          <b-card-footer>
-            <router-link tag="a" class="btn btn-warning" to="import">Import</router-link>
-          </b-card-footer>
-        </b-card>
-
-        <b-card class="border-info mx-2" no-body>
-          <b-card-body>
-            <b-card-title class="text-info">Export to EZproxy.</b-card-title>
-            <p class="card-text">Export your Costanza data to the text format required by EZproxy.</p>
-          </b-card-body>
-          <b-card-footer><router-link tag="a" class="btn btn-info" to="export">Export</router-link></b-card-footer>
-        </b-card>
-
-      </b-card-group>
+              <b-card class="border-info mx-2" no-body>
+                <b-card-body>
+                  <b-card-title class="text-info">Export to EZproxy.</b-card-title>
+                  <p class="card-text">Export your Costanza data to the text format required by EZproxy.</p>
+                </b-card-body>
+                <b-card-footer><router-link tag="a" class="btn btn-info" to="export">Export</router-link></b-card-footer>
+              </b-card>
+            </b-card-group>
+          </b-col>
+          <b-col md="4">
+            <b-card-group deck>
+              <b-card class="border-secondary mx-2" no-body>
+                <b-card-body>
+                  <b-card-title>Recent Stanza Updates</b-card-title>
+                  <div class="card-text">
+                    <div class="mb-2" v-for="update in stanzaUpdates">{{ update.title }}<br/><span class="text-muted">{{ update.date }}</span></div>
+                  </div>
+                </b-card-body>
+                <b-card-footer>
+                  <a href="https://github.com/usask-library/ezproxy-stanzas/" target="github">More...</a>
+                </b-card-footer>
+              </b-card>
+            </b-card-group>
+          </b-col>
+        </b-row>
+      </b-container>
     </template>
 
     <template v-else>
@@ -112,13 +123,18 @@ export default {
 
   data () {
     return {
-      title: window.config.appName
+      title: window.config.appName,
+      stanzaUpdates: null
     }
   },
 
   computed: mapGetters({
     authenticated: 'auth/check'
   }),
+
+  created () {
+    this.getRecentUpdates()
+  },
 
   methods: {
     newConfig () {
@@ -128,7 +144,17 @@ export default {
             router.push({ path: '/edit/config.json' })
           })
           .catch(error => {
-            console.log(error)
+          })
+      }
+    },
+
+    getRecentUpdates () {
+      if (this.authenticated) {
+        axios.get('/api/stanza/updates/5')
+          .then(response => {
+            this.stanzaUpdates = response.data
+          })
+          .catch(error => {
           })
       }
     }

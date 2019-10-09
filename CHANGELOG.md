@@ -1,83 +1,29 @@
 # Changelog
 
-## 4.4.0 - 2019-05-17
+## 0.2.beta.009 - 2019-10-09
 
-- Upgrade to Laravel 5.8
-- Update npm dependencies
-- Added email verification
-- Removed yarn.lock in favor of package-lock.json
-- Fixed `laravel-mix` (HMR, versioning, build cleanup), thanks to [TemaSM](https://github.com/TemaSM)
-- Removed JS polyfills, if you want to support IE11 see [laravel-mix#436](https://github.com/JeffreyWay/laravel-mix/issues/436) 
+- Recent updates to the EZproxy stanza repository
+  ([ezproxy-stanzas](https://github.com/usask-library/ezproxy-stanzas)) are now shown on the
+  main page
 
-## 4.3.0 - 2018-10-21
+## 0.2.beta.008 - 2019-10-07
 
-- Fixed npm install
-- Update fontawesome
+- Allow GitHub to function as the stanza datastore
 
-## 4.2.0 - 2018-10-04
+## 0.2.beta.006 - 2019-10-04
 
-- Upgrade to Laravel 5.7
+- Update install instructions
+- Improve EZproxy import and export procedures
+  - improved validation of imported EZproxy files
+  - improved display of error/warning messages generated as part of the import
+  - improved recognition of inactive entries in the import file
+  - modified the format of the export file
+  - improved the import process for files previously exported by Costanza
 
-## 4.1.1 - 2018-05-10
+## 0.2.beta.002 - 2019-09-27
 
-- Fixed oauth popup
-- Fixed session expired alert
-- Update npm dependencies
+- Update lodash to 4.17.15
 
-## 4.1.0 - 2018-03-14
+## 0.2.beta.001 - 2019-09-27
 
-- Upgrade to Laravel 5.6
-- Update npm dependencies
-- Enabled Mix [esModule](https://github.com/JeffreyWay/laravel-mix/pull/1526#issuecomment-373044182) by default
-- Lint with eslint-plugin-vue and eslint-config-standard 
-
-## 4.0.0 - 2018-01-23
-
-- Brought back the `layout` property in pages that was removed in 3.0. By default it's set to `default` (`~/layouts/default.vue`).
-
-## 3.0.1 - 2018-01-22
-
-- Removed middleware from routes, since they don't work when you press the back button. Now you have to use the `middleware` property in pages.
-
-## 3.0.0 - 2018-01-22
-
-- Removed `layout` property from pages in favor of explicit layout components
-- Improved middleware system, you can either define it on a route or directly on a component
-- Reorganized components
-- Change jwt token ttl to one day
-- Fixed  hot module replacement
-
-## 2.2.1 - 2018-01-19
-
-- Upgrade to Bootstrap 4
-
-## 2.2.0 - 2018-01-16
-
-- Added dynamic import for pages
-- Added locale with dynamic import
-- Import shakable fontawesome module
-
-## 2.1.0 - 2018-01-10
-
-- Simplifyd password reset
-- Upgrade to Bootstrap 4 beta3
-- Added oauth with popup window
-
-## 2.0.0 - 2017-12-19
-
-- Added support for Socialite
-- Added dropdown to select the locale 
-- Added route middleware 
-- Added Font Awesome 5 icons
-- Added user profile photo in navbar
-- Added Chinese and Spanish translations
-- Upgrade to Bootstrap 4 beta2
-- Fixed router scroll behaviour
-- Namespaced store modules  
-- Published project to Packagist 
-
-## 1.0.0 - 2017-09-02
-
-- Upgrade to Laravel 5.5.
-- Upgrade to Bootstrap 4 beta1.
-- Rework routing and guards.
+- Update eslint-utils to 1.4.2

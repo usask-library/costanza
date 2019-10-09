@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\GitHub;
 use App\StanzaList;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -81,5 +82,19 @@ class StanzaListController extends Controller
 
         return response(implode("\n", $stanzaDirectives), 200)
             ->header('Content-Type', 'text/plain');
+    }
+
+
+    /**
+     * Return a list of recent updates to the stanza repository
+     *
+     * @param int $count
+     * @return array
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public static function updates($count = 10)
+    {
+        $feed = array_slice(GitHub::recentStanzaUpdates(), 0, $count);
+        return $feed;
     }
 }
