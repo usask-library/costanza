@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.beta.010 - 2019-10-09
+
+- Minor UI change to editor display
+
 ## 0.2.beta.009 - 2019-10-09
 
 - Recent updates to the EZproxy stanza repository

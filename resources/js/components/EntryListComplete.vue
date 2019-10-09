@@ -1,5 +1,5 @@
 <template>
-  <b-container id="entry-list" class="card-sortable" fluid>
+  <b-container id="entry-list" class="card-sortable mb-5" fluid>
     <template v-if="loading">
       <div>
         <b-spinner label="Loading..." variant="secondary" type="grow"></b-spinner>
