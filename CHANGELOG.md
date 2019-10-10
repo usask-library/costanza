@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.beta.011 - 2019-10-10
+
+- Added GitHub link to stanza display
+
 ## 0.2.beta.010 - 2019-10-09
 
 - Minor UI change to editor display

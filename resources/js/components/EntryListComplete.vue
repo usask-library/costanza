@@ -34,8 +34,9 @@
                   <template v-if="entry.type === 'stanza'">
                     <button class="btn btn-sm col-3 col-md-2 mr-2" :class="[isActive(entry) ? 'btn-primary' : 'btn-outline-primary']">STANZA</button>
                     <b :class="{'text-muted': ! isActive(entry)}">{{ stanzaName(entry) }}</b>
+                    <a :href="githubUrl(entry)" target="github" class="mx-1" title="View this stanza in Costanza's GitHub repo" alt="View this stanza in Costanza's GitHub repo"><fa :icon="['fab', 'github']" /></a>
                     <span v-if="isOclcStanza(entry) === true">
-                      &nbsp; <a :href="oclcStanzaUrl(entry)" target="oclc"><img :src="publicPath + 'images/oclc_logo.png'" title="View this stanza on the OCLC website" alt="View this stanza on the OCLC website" height="16px" /></a>
+                      <a :href="oclcStanzaUrl(entry)" target="oclc" class="mx-1"><img :src="publicPath + 'images/oclc_logo.png'" title="View this stanza on the OCLC website" alt="View this stanza on the OCLC website" height="16px" /></a>
                     </span>
                   </template>
 
@@ -268,6 +269,9 @@ export default {
     },
     isOclcStanza: function (entry) {
       return (entry.hasOwnProperty('code') && this.stanzas[entry.code] && this.stanzas[entry.code].hasOwnProperty('oclcStanzaId')) ? true : false
+    },
+    githubUrl: function (entry) {
+      return (entry.hasOwnProperty('code')) ? 'https://github.com/usask-library/ezproxy-stanzas/blob/master/' + this.stanzas[entry.code].stanza : null
     },
     oclcStanzaUrl: function (entry) {
       return (this.isOclcStanza(entry)) ? 'https://help.oclc.org/Library_Management/EZproxy/Database_stanzas/' + this.stanzas[entry.code].oclcStanzaId : null
