@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.beta.012 - 2019-10-10
+
+- Fix an error that prevented the active/inactive state of stanzas from being saved correctly
+
 ## 0.2.beta.011 - 2019-10-10
 
 - Added GitHub link to stanza display

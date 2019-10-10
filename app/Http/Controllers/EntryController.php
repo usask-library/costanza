@@ -224,7 +224,7 @@ class EntryController extends Controller
                         } else {
                             $stanza['display_name'] = $display_name;
                         }
-                        $stanza['active'] = ($request->get('group_inactive') !== true);
+                        $stanza['active'] = ($request->get('stanza_inactive') !== true);
                         break;
                     case 'custom_stanza':
                         $comment = $request->get('custom_comment');
