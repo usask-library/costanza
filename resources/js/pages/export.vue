@@ -46,8 +46,12 @@
       </div>
     </div>
 
-    <button type="button" class="btn btn-primary" @click.prevent="exportFiles">Export selected files</button>
-
+    <b-button v-if="isExporting" variant="info" disabled pressed="true">
+      Exporting selected files... <b-spinner label="Loading..." small />
+    </b-button>
+    <b-button v-else variant="primary" @click.prevent="exportFiles">
+      Export selected files
+    </b-button>
   </div>
 </template>
 
@@ -55,6 +59,12 @@
 import axios from 'axios'
 import router from '../router';
 import { mapGetters } from 'vuex'
+
+const STATUS_INITIAL = 0;
+const STATUS_EXPORTING = 1;
+const STATUS_SUCCESS = 2;
+const STATUS_WARNING = 3;
+const STATUS_FAILED = 4;
 
 export default {
   middleware: 'auth',
@@ -72,19 +82,43 @@ export default {
       export_files: [],
       oclc_includes: false,
       errors: null,
-      success: null
+      success: null,
+      currentStatus: null,
     }
   },
 
-  computed: mapGetters({
-    authenticated: 'auth/check'
-  }),
+  computed: {
+    ...mapGetters({
+      authenticated: 'auth/check'
+    }),
+
+    isInitial () {
+      return this.currentStatus === STATUS_INITIAL;
+    },
+    isExporting () {
+      return this.currentStatus === STATUS_EXPORTING;
+    },
+    isSuccess () {
+      return this.currentStatus === STATUS_SUCCESS;
+    },
+    isWarning () {
+      return this.currentStatus === STATUS_WARNING;
+    },
+    isFailed () {
+      return this.currentStatus === STATUS_FAILED;
+    }
+  },
 
   mounted () {
-    this.getFileList()
+    this.reset();
+    this.getFileList();
   },
 
   methods: {
+    reset () {
+      this.currentStatus = STATUS_INITIAL;
+    },
+
     getFileList () {
       if (this.authenticated) {
         axios.get('/api/files')
@@ -100,6 +134,7 @@ export default {
       if (this.authenticated) {
         this.errors = null;
         this.success = null;
+        this.currentStatus = STATUS_EXPORTING;
 
         axios.post('/api/files/export', {
           files: this.export_files,
@@ -107,9 +142,11 @@ export default {
         })
           .then(response => {
             this.success = response.data.message;
+            this.currentStatus = STATUS_SUCCESS;
           })
           .catch((error) => {
             this.errors = error.response.data.errors;
+            this.currentStatus = STATUS_SUCCESS;
           });
       }
     }
