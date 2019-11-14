@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\NewEntryRequest;
 use App\Http\Requests\UpdateEntryRequest;
+use App\Http\Requests\UpdateEntryRulesRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -401,6 +403,57 @@ class EntryController extends Controller
             'status' => 'success',
             'message' => 'The entry was successfully moved',
             'data'    => 'Entry ' . $id . ' was successfully placed after entry ' . $validatedData['placeAfter'] . ' in the file ' . $filename,
+        ], 200);
+    }
+
+    /**
+     * Update the processing rules for the specified stanza
+     *
+     * @param UpdateEntryRulesRequest $request
+     * @param $filename
+     * @param $id
+     */
+    public function rules(UpdateEntryRulesRequest $request, $filename, $entry_id)
+    {
+        //dd($id);
+
+        // Read the entire contents of the (JSON formatted) file
+        $EZproxyConfig = json_decode(Storage::disk('users')->get(Auth::user()->institution_code . '/' .  $filename), true);
+
+        // Ensure the only rule attributes accepted are the ones tha are valid
+        $rules = [];
+        foreach ($request->get('rules') as $id => $rule) {
+            $rules[] = Arr::only($rule, ['rule', 'term', 'value', 'enabled']);
+        }
+
+        // Find the requested entry to update
+        $matchingDirective = null;
+        foreach ($EZproxyConfig as $index => $stanza) {
+            if ($stanza['id'] == $entry_id) {
+                // The specified entry was found; replace the ruled
+                $EZproxyConfig[$index]['rules'] = $rules;
+                $matchingDirective = $EZproxyConfig[$index];
+            }
+        }
+
+        // If the specified entry was not actually in the file, then its rules cannot be updated
+        if (empty($matchingDirective)) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'The specified entry could not be found in the EZproxy config file',
+                'data'    => 'Entry ' . $entry_id . ' could not be found in the file ' . $filename,
+            ], 400);
+        }
+
+        // The EZproxyConfig array contains the list of entries, with updated rules for the specified entry
+        // Write this updated list out to the disk
+        Storage::disk('users')->put(Auth::user()->institution_code . '/' .  $filename, json_encode($EZproxyConfig, JSON_PRETTY_PRINT));
+
+        // Return a success message
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Rules updated successfully',
+            'data'    => 'Rules for ' . $entry_id . ' in the file ' . $filename . ' were successfully updated',
         ], 200);
     }
 }

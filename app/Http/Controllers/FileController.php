@@ -440,8 +440,6 @@ class FileController extends Controller
                         $entry['code'] . '|' .
                         ((! empty($entry['name'])) ? $entry['name'] : '') ;
 
-                    // ToDo: Figure out what to do with custom rules once that feature is implemented
-
                     // Stanzas can have user supplied notes/comments
                     // Each line of the comment is preceded by a double #
                     if (! empty($entry['comment'])) {
@@ -462,7 +460,9 @@ class FileController extends Controller
                         if (empty($stanzaDirectives)) {
                             $conversionErrors[] = 'Could not find the stanza contents for ' . $entry['code'];
                         } else {
-                            // ToDo: Process any rules for manipulating the stanza here before it gets dumped to the output file
+                            if (! empty($entry['rules'])) {
+                                $stanzaDirectives = $this->processRules($stanzaDirectives, $entry['rules']);
+                            }
                             foreach ($stanzaDirectives as $value) {
                                 $buffer[] = ((isset($entry['active']) && ($entry['active'] === false)) ? '#' : '') . $value;
                             }
@@ -510,6 +510,49 @@ class FileController extends Controller
 
 
     /**
+     * Apply a list of processing rules to the directives in a stanza
+     *
+     * @param array $stanza
+     * @param array $rules
+     * @return array
+     */
+    private function processRules(array $stanza, array $rules) {
+         $newStanza = $stanza;
+
+        foreach ($rules as $rule) {
+            if ($rule['enabled']) {
+                switch ($rule['rule']) {
+                    case 'Prepend':
+                        if (! empty($rule['value'])) {
+                            $newStanza = array_merge(preg_split("/[\r\n]+/", $rule['value']), $newStanza);
+                        }
+                        break;
+                    case 'Append':
+                        if (! empty($rule['value'])) {
+                            $newStanza = array_merge($newStanza, preg_split("/[\r\n]+/", $rule['value']));
+                        }
+                        break;
+                    case 'Replace':
+                        if (! empty($rule['term'])) {
+                            $directives = [];
+                            foreach ($newStanza as $directive) {
+                                if (! empty($rule['value'])) {
+                                    $directives[] = str_replace($rule['term'], $rule['value'], $directive);
+                                } else {
+                                    $directives[] = str_replace($rule['term'], '', $directive);
+                                }
+                            }
+                            $newStanza = $directives;
+                        }
+                        break;
+                }
+            }
+        }
+
+        return $newStanza;
+    }
+
+/**
      * Import one or more EZproxy configuration files (in plain text format), converting them to the
      * internal format (JSON) used by Costanza
      *

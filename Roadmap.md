@@ -4,8 +4,7 @@ Not so much a roadmap, as there are no dates or specific releases targeted for a
 It's more a to-do list of issues to address and features that might make it into future releases.
 
 1. Add rules management to the editor
-   1. replace
-   1. prepend/append
+   1. prepend, append, replace (Added in 0.3)
    1. insert, insert before, insert after
 1. Clean up code!
    1. Make better use of BootstrapVue components

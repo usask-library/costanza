@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.001 - 2019-10-21
+
+- Changed version numbering scheme
+- Add rules management
+  - Rules allow the original stanza to be manipulated/modified before being placed in the EZproxy
+    file. An example would be OCLC stanzas with placeholders (like usernames or passwords)
+    that need to be changed before that stanza can be used.
+  - Currently supported rules are Prepend, Append, and Replace
+
 ## 0.2.beta.012 - 2019-10-10
 
 - Fix an error that prevented the active/inactive state of stanzas from being saved correctly

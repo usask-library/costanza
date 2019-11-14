@@ -1,16 +1,16 @@
 <template>
-  <div>
+  <form>
     <input type="hidden" name="insert_after" value="insert_after_id_goes_here">
     <div class="form-group row">
       <label for="stanza_id" class="col-md-2 col-form-label">Stanza</label>
       <div class="col-md-10">
         <VSelect
+          id="stanza_id"
           v-model="stanza_id"
           :options="selectOptions"
           :searchable="selectSearchable"
           :textProp="selectName"
           :valueProp="selectValue"
-          :class="form-control"
         />
       </div>
     </div>
@@ -42,7 +42,7 @@
       </div>
     </div>
     <button type="button" class="btn btn-primary float-right" data-type="stanza" @click="addStanza()">Add Database Stanza</button>
-  </div>
+  </form>
 </template>
 
 <script>
@@ -58,7 +58,7 @@ const Toast = Swal.mixin({
   timer: 5000,
   showConfirmButton: false,
   showCancelButton: false
-})
+});
 
 export default {
   name: 'StanzaNew.vue',

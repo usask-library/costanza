@@ -1,19 +1,20 @@
 <template>
-  <b-container id="entry-list" class="card-sortable mb-5" fluid>
-    <template v-if="loading">
-      <div>
-        <b-spinner label="Loading..." variant="secondary" type="grow"></b-spinner>
-      </div>
-    </template>
-    <template v-else>
+  <div>
+    <b-container id="entry-list" class="card-sortable mb-5" fluid>
+      <template v-if="loading">
+        <div>
+          <b-spinner label="Loading..." variant="secondary" type="grow" />
+        </div>
+      </template>
+      <template v-else>
+        <div v-if="entries.length === 0" class="alert alert-info mt-5">
+          <p>There are no stanzas or directives in this file yet.  Go ahead and add one!</p>
+          <button v-b-modal.AddEntryModal class="btn btn-primary" @click="setInsertAfter('top', 0)">
+            Add an entry
+          </button>
+        </div>
 
-      <div v-if="entries.length === 0" class="alert alert-info mt-5">
-        <p>There are no stanzas or directives in this file yet.  Go ahead and add one!</p>
-        <button v-b-modal.AddEntryModal class="btn btn-primary" @click="setInsertAfter('top', 0)">Add an entry</button>
-      </div>
-
-      <draggable v-model="entries" handle=".handle" @end="onEnd">
-        <transition-group>
+        <draggable v-model="entries" group="entries" handle=".handle" @end="onEnd">
           <div v-for="(entry, index) in entries" :id="entry.id" :key="entry.id" class="card" :data-type="entry.type">
             <div class="card-header">
               <div class="row">
@@ -21,32 +22,44 @@
                   <fa icon="grip-lines" fixed-width class="handle" />
 
                   <template v-if="entry.type === 'directive'">
-                    <button class="btn btn-sm col-3 col-md-2 mr-2" :class="[ isActive(entry) ? 'btn-warning' : 'btn-outline-warning']">DIRECTIVE</button>
+                    <button class="btn btn-sm col-3 col-md-2 mr-2" :class="[ isActive(entry) ? 'btn-warning' : 'btn-outline-warning']">
+                      DIRECTIVE
+                    </button>
                     <b :class="{'text-muted': ! isActive(entry)}">{{ entry.name }}</b>
                     <code>{{ firstValue(entry) }}</code>
                   </template>
 
                   <template v-if="entry.type === 'group'">
-                    <button class="btn btn-sm col-3 col-md-2 mr-2" :class="isActive(entry) ? 'btn-success' : 'btn-outline-success'">GROUP</button>
+                    <button class="btn btn-sm col-3 col-md-2 mr-2" :class="isActive(entry) ? 'btn-success' : 'btn-outline-success'">
+                      GROUP
+                    </button>
                     <b :class="{'text-muted': ! isActive(entry)}">{{ entry.name }}</b>
                   </template>
 
                   <template v-if="entry.type === 'stanza'">
-                    <button class="btn btn-sm col-3 col-md-2 mr-2" :class="[isActive(entry) ? 'btn-primary' : 'btn-outline-primary']">STANZA</button>
+                    <button class="btn btn-sm col-3 col-md-2 mr-2" :class="[isActive(entry) ? 'btn-primary' : 'btn-outline-primary']">
+                      STANZA
+                    </button>
                     <b :class="{'text-muted': ! isActive(entry)}">{{ stanzaName(entry) }}</b>
-                    <a :href="githubUrl(entry)" target="github" class="mx-1" title="View this stanza in Costanza's GitHub repo" alt="View this stanza in Costanza's GitHub repo"><fa :icon="['fab', 'github']" /></a>
+                    <a :href="githubUrl(entry)" target="github" class="mx-1" title="View this stanza in Costanza's GitHub repo"><fa :icon="['fab', 'github']" /></a>
                     <span v-if="isOclcStanza(entry) === true">
-                      <a :href="oclcStanzaUrl(entry)" target="oclc" class="mx-1"><img :src="publicPath + 'images/oclc_logo.png'" title="View this stanza on the OCLC website" alt="View this stanza on the OCLC website" height="16px" /></a>
+                      <a :href="oclcStanzaUrl(entry)" target="oclc" class="mx-1">
+                        <img :src="publicPath + 'images/oclc_logo.png'" title="View this stanza on the OCLC website" alt="View this stanza on the OCLC website" height="16px" />
+                      </a>
                     </span>
                   </template>
 
                   <template v-if="entry.type === 'custom_stanza'">
-                    <button class="btn btn-sm col-3 col-md-2 mr-2" :class="[isActive(entry) ? 'btn-info' : 'btn-outline-info']">CUSTOM</button>
+                    <button class="btn btn-sm col-3 col-md-2 mr-2" :class="[isActive(entry) ? 'btn-info' : 'btn-outline-info']">
+                      CUSTOM
+                    </button>
                     <b :class="{'text-muted': ! isActive(entry)}">{{ entry.name }}</b>
                   </template>
 
                   <template v-if="entry.type === 'comment'">
-                    <button class="btn btn-sm col-3 col-md-2 mr-2" :class="[isActive(entry) ? 'btn-secondary' : 'btn-outline-secondary']">COMMENT</button>
+                    <button class="btn btn-sm col-3 col-md-2 mr-2" :class="[isActive(entry) ? 'btn-secondary' : 'btn-outline-secondary']">
+                      COMMENT
+                    </button>
                     <code>{{ firstValue(entry) }}</code>
                   </template>
                 </div>
@@ -79,7 +92,7 @@
                   <GroupView :entry="entry"></GroupView>
                 </template>
                 <template v-else-if="entry.type === 'stanza'">
-                  <StanzaView :entry="entry" :stanza="stanzas[entry.code]"></StanzaView>
+                  <StanzaView :filename="filename" :entry="entry" :stanza="stanzas[entry.code]"></StanzaView>
                 </template>
                 <template v-else-if="entry.type === 'custom_stanza'">
                   <CustomStanzaView :entry="entry"></CustomStanzaView>
@@ -87,13 +100,12 @@
               </div>
             </div>
           </div><!-- Entry -->
-
-        </transition-group>
-      </draggable>
-    </template>
-    <AddEntryModal :insertAfter="insertAfter" :filename="filename" :stanzas="stanzas"></AddEntryModal>
-    <EditEntryModal :entry="entry" :filename="filename" :stanzas="stanzas"></EditEntryModal>
-  </b-container>
+          <EditEntryModal :entry="entry" :filename="filename" :stanzas="stanzas" />
+        </draggable>
+        <AddEntryModal :insertAfter="insertAfter" :filename="filename" :stanzas="stanzas" />
+      </template>
+    </b-container>
+  </div>
 </template>
 
 <script>
@@ -104,13 +116,14 @@ import router from '~/router';
 import draggable from 'vuedraggable';
 import Swal from 'sweetalert2';
 
+import { getStanzaList } from '../plugins/stanzas'
+import { EventBus } from '~/plugins/EventBus.js'
+
 import CommentView from './CommentView';
 import DirectiveView from './DirectiveView';
 import GroupView from './GroupView';
 import StanzaView from './StanzaView';
 import CustomStanzaView from './CustomStanzaView';
-import { getStanzaList } from '../plugins/stanzas'
-import { EventBus } from '~/plugins/EventBus.js'
 import AddEntryModal from './AddEntryModal'
 import EditEntryModal from './EditEntryModal'
 
@@ -148,7 +161,7 @@ export default {
   },
 
   props: {
-    filename: String
+    filename: { type: String, default: '' }
   },
 
   data () {
@@ -160,7 +173,7 @@ export default {
       stanzas: {},
       insertAfter: null,
       insertIndex: 0,
-      entry: null
+      entry: {}
     }
   },
 
@@ -189,14 +202,14 @@ export default {
     },
 
     getConfigFile () {
-      this.loading = true
+      this.loading = true;
       axios.get('/api/files/' + this.filename)
         .then(response => {
-          this.loading = false
+          this.loading = false;
           this.entries = response.data.data
         })
         .catch(error => {
-          this.loading = false
+          this.loading = false;
           Alert.fire({
             title: 'File not found',
             html: error.response.data.message
@@ -207,10 +220,10 @@ export default {
     },
 
     deleteEntry (index) {
-      var id = this.entries[index].id
+      var id = this.entries[index].id;
       axios.delete('/api/files/' + this.filename + '/entries/' + id)
         .then(response => {
-          this.entries.splice(index, 1)
+          this.entries.splice(index, 1);
           Toast.fire({
             type: 'success',
             title: 'Deleted!',
@@ -228,8 +241,8 @@ export default {
 
     onEnd: function (evt) {
       if (evt.oldIndex !== evt.newIndex) {
-        var entryId = this.entries[evt.newIndex].id
-        var previousId = (evt.newIndex === 0) ? 'top' : this.entries[evt.newIndex - 1].id
+        var entryId = this.entries[evt.newIndex].id;
+        var previousId = (evt.newIndex === 0) ? 'top' : this.entries[evt.newIndex - 1].id;
 
         axios.post('/api/files/' + this.filename + '/entries/' + entryId, {
           placeAfter: previousId
@@ -243,9 +256,9 @@ export default {
           })
           .catch(error => {
             // Get the entry from the new location, delete it, insert it back at the old location
-            var entry = this.entries[evt.newIndex]
-            this.entries.splice(evt.newIndex, 1)
-            this.entries.splice(evt.oldIndex, 0, entry)
+            var entry = this.entries[evt.newIndex];
+            this.entries.splice(evt.newIndex, 1);
+            this.entries.splice(evt.oldIndex, 0, entry);
 
             Toast.fire({
               type: 'error',
@@ -271,7 +284,7 @@ export default {
       return (entry.hasOwnProperty('code') && this.stanzas[entry.code] && this.stanzas[entry.code].hasOwnProperty('oclcStanzaId')) ? true : false
     },
     githubUrl: function (entry) {
-      return (entry.hasOwnProperty('code')) ? 'https://github.com/usask-library/ezproxy-stanzas/blob/master/' + this.stanzas[entry.code].stanza : null
+      return (entry.hasOwnProperty('code') && this.stanzas[entry.code] && this.stanzas[entry.code].hasOwnProperty('stanza')) ? 'https://github.com/usask-library/ezproxy-stanzas/blob/master/' + this.stanzas[entry.code].stanza : null
     },
     oclcStanzaUrl: function (entry) {
       return (this.isOclcStanza(entry)) ? 'https://help.oclc.org/Library_Management/EZproxy/Database_stanzas/' + this.stanzas[entry.code].oclcStanzaId : null

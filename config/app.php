@@ -12,7 +12,7 @@ return [
     | any other location as required by the application or its packages.
     |
     */
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'Costanza'),
 
     /*
     |--------------------------------------------------------------------------
@@ -20,17 +20,13 @@ return [
     |--------------------------------------------------------------------------
     |
     | The application version number in major.minor.milestone.build format
-    /
-    / - major: significant architectural changes or new capabilities
-    / - minor: small changes or new features that do not require architectural changes
-    / - milestone:
-    /    - "dev" for development versions
-    /    - "beta" for alpha/beta/test versions
-    /    - "release" for final/production releases
-    / - build: sequential number that increments with each build/commit
+    |
+    | - major: significant architectural changes or new capabilities
+    | - minor: small changes or new features that do not require architectural changes
+    | - build: sequential number that increments with each build/commit
     |
     */
-    'version' => '0.2.beta.012',
+    'version' => '0.3.001',
 
     /*
     |--------------------------------------------------------------------------

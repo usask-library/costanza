@@ -46,10 +46,11 @@ Route::group(['middleware' => 'auth:api'], function () {
 
     // EZproxy/Costanza file entry routes
     Route::get('files/{filename}/entries/{id}', 'EntryController@show');
-    Route::post('files/{filename}/entries', 'EntryController@store');
     Route::match(['put', 'patch'], 'files/{filename}/entries/{id}', 'EntryController@update');
     Route::delete('files/{filename}/entries/{id}', 'EntryController@destroy');
+    Route::post('files/{filename}/entries/{id}/rules', 'EntryController@rules');
     Route::post('files/{filename}/entries/{id}', 'EntryController@move');
+    Route::post('files/{filename}/entries', 'EntryController@store');
 });
 
 // Administrative routes (for account creation, login, password management etc)
