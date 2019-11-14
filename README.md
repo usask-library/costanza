@@ -117,6 +117,11 @@ Some further changes to the .env file are needed.
   or `true` if you wish to have Costanza fetch stanza information data from the GitHub repository in real time
 - The `MAIL_*` entries may need to be adjusted, depending on the mail configuration of your server
 
+> :warning: The GitHub API limits unauthenticated requests to 60 per hour, which may not be enough to successfully use
+> GitHub as a backend datastore in a production environment. It is recommended therefore that you also supply values
+> for `GITHUB_USERNAME` and `GITHUB_PASSWORD`. This will allow Costanza to make authenticated requests to the GitHub
+> API, which have a much higher request limit. 
+
 #### Generate Production Vue Code
 
 Run the following to generate production ready Vue code for Costanza.  Note, this **must** be done **after** creating

@@ -1,5 +1,13 @@
 # Changelog
 
+
+## 0.3.002 - 2019-11-14
+
+- Added support for GitHub authentication
+  - Unauthenticated requests to the GitHub API are limited to 60 per hour, which makes using GitHub as the datastore
+    somewhat impractical
+  - Authenticated GitHub API requests are limited to 5000 per hour
+
 ## 0.3.001 - 2019-10-21
 
 - Changed version numbering scheme

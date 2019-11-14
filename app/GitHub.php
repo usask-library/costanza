@@ -8,6 +8,8 @@ use GuzzleHttp\Client;
 class GitHub
 {
     const STANZA_REPO_URI = 'https://api.github.com/repos/usask-library/ezproxy-stanzas';
+
+
     /**
      * Fetch a file from ezproxy-stanzas repo.
      *
@@ -22,7 +24,12 @@ class GitHub
     {
         $client = new Client();
 
-        $response = $client->request('GET', self::STANZA_REPO_URI . '/contents/' . $repositoryFile);
+        if ((! empty(env('GITHUB_USERNAME'))) && (! empty(env('GITHUB_PASSWORD')))) {
+            $response = $client->request('GET', self::STANZA_REPO_URI . '/contents/' . $repositoryFile,
+                ['auth' => [env('GITHUB_USERNAME'), env('GITHUB_PASSWORD')]]);
+        } else {
+            $response = $client->request('GET', self::STANZA_REPO_URI . '/contents/' . $repositoryFile);
+        }
         if ($response->getStatusCode() != '200') {
             return null;
         }
@@ -50,7 +57,12 @@ class GitHub
         $feed = [];
 
         $client = new Client();
-        $response = $client->request('GET', self::STANZA_REPO_URI . '/commits');
+        if ((! empty(env('GITHUB_USERNAME'))) && (! empty(env('GITHUB_PASSWORD')))) {
+            $response = $response = $client->request('GET', self::STANZA_REPO_URI . '/commits',
+                ['auth' => [env('GITHUB_USERNAME'), env('GITHUB_PASSWORD')]]);
+        } else {
+            $response = $client->request('GET', self::STANZA_REPO_URI . '/commits');
+        }
         if ($response->getStatusCode() != '200') {
             return $feed;
         }
