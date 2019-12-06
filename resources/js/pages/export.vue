@@ -38,15 +38,15 @@
 
     <div class="form-group">
       <div class="form-check">
-        <input id="oclc_includes" v-model="oclc_includes" type="checkbox" class="form-check-input" />
-        <label for="oclc_includes" class="form-check-label">
-          Use OCLC's Hosted EZproxy Include File for resources that have one.<br>
+        <b-form-checkbox id="oclc_includes" v-model="oclc_includes">
+          Use OCLC's hosted <code>IncludeFile</code> for stanzas that have one.<br>
           This will generate an EZproxy file that can be used by OCLC hosted EZproxy customers.
-        </label>
+        </b-form-checkbox>
+        <!-- input id="oclc_includes" v-model="oclc_includes" type="checkbox" class="form-check-input" / -->
       </div>
     </div>
 
-    <b-button v-if="isExporting" variant="info" disabled pressed="true">
+    <b-button v-if="isExporting" variant="info" disabled :pressed="true">
       Exporting selected files... <b-spinner label="Loading..." small />
     </b-button>
     <b-button v-else variant="primary" @click.prevent="exportFiles">

@@ -453,7 +453,13 @@ class FileController extends Controller
                         $conversionErrors[] = 'Unknown stanza code ' . $entry['code'];
                         $buffer[] = '#-- Costanza did not recognize stanza code ' . $entry['code'];
                     } elseif ($oclc_includes && (! empty($stanza->oclcIncludeFile))) {
-                        $buffer[] .= 'IncludeFile ' . $stanza->oclcIncludeFile;
+                        if (is_array($stanza->oclcIncludeFile)) {
+                            foreach ($stanza->oclcIncludeFile as $includeFile) {
+                                $buffer[] .= 'IncludeFile ' . $includeFile;
+                            }
+                        } else {
+                            $buffer[] .= 'IncludeFile ' . $stanza->oclcIncludeFile;
+                        }
                     } else {
                         // Get the contents of the actual stanza
                         $stanzaDirectives = StanzaList::getStanza($entry['code']);
@@ -524,12 +530,12 @@ class FileController extends Controller
                 switch ($rule['rule']) {
                     case 'Prepend':
                         if (! empty($rule['value'])) {
-                            $newStanza = array_merge(preg_split("/[\r\n]+/", $rule['value']), $newStanza);
+                            $newStanza = array_merge(preg_split("/[\r\n]/", $rule['value']), $newStanza);
                         }
                         break;
                     case 'Append':
                         if (! empty($rule['value'])) {
-                            $newStanza = array_merge($newStanza, preg_split("/[\r\n]+/", $rule['value']));
+                            $newStanza = array_merge($newStanza, preg_split("/[\r\n]/", $rule['value']));
                         }
                         break;
                     case 'Replace':

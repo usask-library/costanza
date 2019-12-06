@@ -92,6 +92,6 @@ class StanzaList
         if (empty($stanzaDirectives)) {
             return false;
         }
-        return preg_split("/[\r\n]+/", $stanzaDirectives);
+        return preg_split("/[\r\n]/", $stanzaDirectives);
     }
 }

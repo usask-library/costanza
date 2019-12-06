@@ -36,6 +36,6 @@ class FileExportRequest extends FormRequest
             'files.array' => 'The list of files to export was empty',
             'files.required' => 'The list of files to export was empty',
             'files.*.regex' => 'The files must be JSON format',
-            'oclc_inlcudes.boolean' => 'The option to use OCLC Hosted Include files must be either true or false',
+            'oclc_includes.boolean' => 'The option to use OCLC Hosted Include files must be either true or false',
         ];
     }}

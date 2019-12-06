@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.003 - 2019-12-06
+
+- Fix an issue with exporting stanzas that have multiple IncludeFiles
+  - Some stanzas (such as ClinicalKey and Embase) have multiple IncludeFile definitions for OCLC hosted files;
+    these are now correctly handled
+- This update also addresses an issue where empty lines were being removed from stanzas
 
 ## 0.3.002 - 2019-11-14
 
