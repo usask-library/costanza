@@ -31,12 +31,24 @@ class ProfileController extends Controller
             $request->merge(['institution_code' => uniqid()]);
         }
 
-        // If the institution code changed, move the user's data directory
-        Log::debug('Comparing ' . $user->institution_code . ' to ' . $request->get('institution_code'));
-        if (($user->institution_code != $request->get('institution_code')) && Storage::disk('users')->exists($user->institution_code)) {
-            Storage::disk('users')->move($user->institution_code, $request->get('institution_code'));
+        // If the institution code changed...
+        if ($user->institution_code != $request->get('institution_code')) {
+            // Check if a folder matching the new institution code already exists
+            if (Storage::disk('users')->exists($request->get('institution_code'))) {
+                // It does, meaning this user is will start sharing a workspace with an existing user
+                // ToDo: Decide on the best course of action for the old folder -- abandon, merge, delete
+                // Current course of action is to just abandon the old folder, as this is non-destructive
+                // Storage::disk('users')->deleteDirectory($user->institution_code);
+            } else {
+                // It does not, meaning this user simply changed their institution ID
+                // Move their current files to the new location (i.e. rename the folder)
+                Storage::disk('users')->move($user->institution_code, $request->get('institution_code'));
+            }
+
+            // Update the institution code on the account
+            return tap($user)->update($request->only('name', 'email', 'institution_code'));
         }
 
-        return tap($user)->update($request->only('name', 'email', 'institution_code'));
+        return $user;
     }
 }

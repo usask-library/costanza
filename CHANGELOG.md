@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.3.003 - 2019-12-06
+## 0.3.005 - 2019-12-19
+
+- Fix an issue with updating the Institution Code (used for sharing) in the user's profile
+
+## 0.3.004 - 2019-12-06
 
 - Fix an issue with exporting stanzas that have multiple IncludeFiles
   - Some stanzas (such as ClinicalKey and Embase) have multiple IncludeFile definitions for OCLC hosted files;
