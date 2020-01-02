@@ -173,7 +173,7 @@ class FileController extends Controller
     /**
      * Return a JSON encoded list of files in the user's storage folder.
      *
-     * @return array
+     * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     public function index()
@@ -210,7 +210,7 @@ class FileController extends Controller
      * Creates a new Costanza (JSON) formatted EZproxy file with OCLC's default configuration as the base.
      *
      * @param FileNewRequest $request
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Http\JsonResponse
      */
     public function create(FileNewRequest $request)
     {
@@ -222,17 +222,25 @@ class FileController extends Controller
             $fileContents = Storage::get('stub.json');
         }
 
+        // Check that the specified file doesn't already exist
+        if (Storage::disk('users')->exists(Auth::user()->institution_code . '/' . $filename)) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => ['filename' => ['A file named ' . $filename . ' already exists']],
+            ], 409);
+        }
+
         // Save this as a Costanza config file for the user
         if (Storage::disk('users')->put(Auth::user()->institution_code . '/' . $filename, $fileContents)) {
             return response()->json([
                 'status' => 'success',
-                'message' => 'Successfully created ' . $filename
+                'message' => 'Successfully created ' . $filename,
             ], 200);
         }
 
         return response()->json([
             'status' => 'error',
-            'message' => 'Failed to create the file ' . $filename
+            'message' => 'Failed to create the file ' . $filename,
         ], 400);
     }
 

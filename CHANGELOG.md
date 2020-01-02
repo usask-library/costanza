@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.006 - 2020-01-02
+
+- Fix an issue that allowed new files to be created with the same name as existing files, thereby overwriting the
+  existing file
+
 ## 0.3.005 - 2019-12-19
 
 - Fix an issue with updating the Institution Code (used for sharing) in the user's profile
