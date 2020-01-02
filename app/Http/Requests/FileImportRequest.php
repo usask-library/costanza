@@ -26,6 +26,7 @@ class FileImportRequest extends FormRequest
         return [
             'EZproxyFiles' => 'required|array',
             'EZproxyFiles.*' => 'file|mimes:txt',
+            'allowOverwrite' => 'required|boolean',
         ];
     }
 
@@ -35,5 +36,6 @@ class FileImportRequest extends FormRequest
             'EZproxyFiles.array' => 'The upload does not appear to be a list of files',
             'EZproxyFiles.required' => 'One or more files files are required',
             'EZproxyFiles.*.mimes' => 'The uploaded file(s) must be plain text files',
+            'allowOverwrite' => 'The allow overwrite checkbox had neither a true or false value',
         ];
     }}

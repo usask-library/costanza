@@ -578,6 +578,7 @@ class FileController extends Controller
         // Some arrays to hold any errors/warnings returned by the converter, as well as the list of converted files
         $importErrors = [];
         $importedFiles = [];
+        $allowOverwrite = $request->get('allowOverwrite');
 
         // Process each uploaded file in turn
         foreach ($request->file('EZproxyFiles') as $file) {
@@ -586,7 +587,7 @@ class FileController extends Controller
             $importedFiles[] = $filename;
 
             // Perform the file conversion.  The return value is either null, or an array of warnings/errors
-            $status = $this->convertFromEZproxy($file);
+            $status = $this->convertFromEZproxy($file, $allowOverwrite);
             if (! empty($status)) {
                 $importErrors[$filename] = $status;
             }
@@ -616,13 +617,18 @@ class FileController extends Controller
      * @param UploadedFile $uploadedFile
      * @return array|null
      */
-    private function convertFromEZproxy(UploadedFile $uploadedFile) {
+    private function convertFromEZproxy(UploadedFile $uploadedFile, $allowOverwrite = false) {
         // Drop the original (.txt) extension and add .json
         $filename = str_replace('.' . $uploadedFile->getClientOriginalExtension(), '', $uploadedFile->getClientOriginalName()) . '.json';
 
         // Check that the file upload was successful
         if (! $uploadedFile->isValid()) {
             return ['The file upload failed'];
+        }
+
+        // Check that the specified file doesn't already exist
+        if ((Storage::disk('users')->exists(Auth::user()->institution_code . '/' . $filename)) && (! $allowOverwrite)) {
+            return ['A file named ' . $filename . ' already exists'];
         }
 
         // First a few arrays and flags needed for processing

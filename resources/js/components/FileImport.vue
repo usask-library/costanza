@@ -2,6 +2,12 @@
   <div>
     <!--UPLOAD-->
     <form v-if="isInitial || isSaving" enctype="multipart/form-data" novalidate>
+      <div class="form-check">
+        <input class="form-check-input" v-model="allowOverwrite" type="checkbox" id="allowOverwrite">
+        <label class="form-check-label" for="allowOverwrite">
+          Allow existing files to be overwritten
+        </label>
+      </div>
       <div class="dropbox bg-light">
         <input type="file" multiple :name="uploadFieldName" :disabled="isSaving"
                @change="filesChange($event.target.name, $event.target.files); fileCount = $event.target.files.length"
@@ -30,7 +36,7 @@
     <div v-if="isFailed || isWarning">
       <div class="alert" v-bind:class="{ 'alert-danger': isFailed, 'alert-warning': isWarning }">
         <template v-if="isFailed">
-          <p >Upload failed.</p>
+          <p>Upload failed.</p>
           <ul v-html="uploadError"></ul>
         </template>
         <template v-else-if="isWarning">
@@ -79,6 +85,7 @@ export default {
       uploadError: null,
       currentStatus: null,
       uploadFieldName: 'EZproxyFiles[]',
+      allowOverwrite: false,
       warnings: null,
       errors: null
     }
@@ -162,6 +169,8 @@ export default {
         .map(x => {
           formData.append(fieldName, fileList[x], fileList[x].name);
         });
+
+      formData.append('allowOverwrite', this.allowOverwrite ? 1 : 0);
 
       // save it
       this.save(formData);

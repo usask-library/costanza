@@ -26,7 +26,7 @@ return [
     | - build: sequential number that increments with each build/commit
     |
     */
-    'version' => '0.3.006',
+    'version' => '0.3.007',
 
     /*
     |--------------------------------------------------------------------------
