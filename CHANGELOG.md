@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.007 - 2020-01-02
+## 0.3.008 - 2020-01-02
 
 - Fix an issue that allowed imported files to be overwrite existing files with the same name
   - The default behaviour was changed to NOT allow overwrite
