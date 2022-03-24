@@ -26,7 +26,7 @@
     "js-cookie": "^2.2.1",
     "kind-of": "^6.0.3",
     "lodash": "^4.17.15",
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.6",
     "popper.js": "^1.15.0",
     "serialize-javascript": "^2.1.2",
     "sweetalert2": "^8.17.1",
